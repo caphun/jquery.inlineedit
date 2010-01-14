@@ -12,7 +12,7 @@
 
 (function($) {
 
-    $.fn.inlineedit = function(options) {
+    $.fn.inlineEdit = function(options) {
 
         options = $.extend({
             hover: 'hover',
@@ -24,11 +24,11 @@
         }, options);
 
         return $.each(this, function() {
-            $.inlineedit(this, options);
+            $.inlineEdit(this, options);
         });
     }
 
-    $.inlineedit = function(obj, options) {
+    $.inlineEdit = function(obj, options) {
         var self = $(obj),
             placeholderHtml = '<span class="inlineEdit-placeholder">'+ options.placeholder +'</span>',
             control = options.control;

@@ -8,8 +8,6 @@
  * http://github.com/caphun/jquery.inlineedit/
  *
  * Inline (in-place) editing.
- *
- * @version 0.3.0
  */
 
 (function($) {

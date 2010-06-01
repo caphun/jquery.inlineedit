@@ -2,8 +2,7 @@
  * jQuery inlineEdit
  *
  * Copyright (c) 2009 Ca-Phun Ung <caphun at yelotofu dot com>
- * Dual licensed under the MIT (MIT-LICENSE.txt)
- * and GPL (GPL-LICENSE.txt) licenses.
+ * Licensed under the MIT (MIT-LICENSE.txt) license.
  *
  * http://github.com/caphun/jquery.inlineedit/
  *
@@ -15,7 +14,7 @@
     $.fn.inlineEdit = function(options) {
 
         options = $.extend({
-            hover: 'hover',
+            hover: 'ui-state-hover',
             value: '',
             save: '',
             buttonText: 'Save',
@@ -23,7 +22,7 @@
             control: 'input'
         }, options);
 
-        return $.each(this, function() {
+        return this.each(function() {
             $.inlineEdit(this, options);
         });
     }
@@ -35,7 +34,7 @@
 
         self.value = function(newValue) {
             if (arguments.length) {
-                self.data('value', $(newValue).hasClass('inlineEdit-placeholder') ? '' : newValue.replace(/\n/g,"<br />"));
+                self.data('value', $('.inlineEdit-placeholder', self).length ? '' : newValue.replace(/\n/g,"<br />"));
             }
             return self.data('value');
         }

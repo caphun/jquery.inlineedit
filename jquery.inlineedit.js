@@ -11,88 +11,142 @@
 
 (function($) {
 
-    $.fn.inlineEdit = function(options) {
+// cached values
+var namespace = '.inlineedit',
+    placeholderClass = 'inlineEdit-placeholder';
 
-        options = $.extend({
-            hover: 'ui-state-hover',
-            value: '',
-            save: '',
-            buttonText: 'Save',
-            placeholder: 'Click to edit',
-            control: 'input'
-        }, options);
+// define inlineEdit method
+$.extend( $.fn, {
+    inlineEdit: function( options ) {
+        return this.each( function() {
 
-        return this.each(function() {
-            $.inlineEdit(this, options);
+            new $.inlineEdit( this, options );
+
         });
     }
+});
 
-    $.inlineEdit = function(obj, options) {
-        var self = $(obj),
-            placeholderHtml = '<span class="inlineEdit-placeholder">'+ options.placeholder +'</span>',
-            control = options.control;
+// plugin constructor
+$.inlineEdit = function( elem, options ) {
 
-        self.value = function(newValue) {
-            if (arguments.length) {
-                self.data('value', $('.inlineEdit-placeholder', self).length ? '' : newValue.replace(/\n/g,"<br />"));
-            }
-            return self.data('value');
-        }
+    // deep extend
+    this.options = $.extend( true, {}, $.inlineEdit.defaults, options );
 
-        self.value($.trim(self.text()) || options.value);
+    // the original element
+    this.element = $( elem );
 
-        self.bind('click', function(event) {
-            var $this = $(event.target);
+    // go!
+    this.init();
+}
 
-            if ($this.is('button')) {
-                var hash = {
-                    value: $input = $this.siblings(control).val()
-                };
+// plugin extensions
+$.extend( $.inlineEdit, {
 
-                if (($.isFunction(options.save) && options.save.call(self, event, hash)) !== false || !options.save) {
-                    self.value(hash.value);
+    // plugin defaults
+    defaults: {
+        hover: 'ui-state-hover',
+        value: '',
+        save: '',
+        buttonText: 'Save',
+        placeholder: 'Click to edit',
+        control: 'input'
+    },
+
+    // plugin prototypes
+    prototype: {
+
+        // initialisation
+        init: function() {
+
+            this.initValue();
+
+            var self = this;
+
+            self.element.bind( 'click', function( event ) {
+                var $this = $( event.target );
+
+                if ( $this.is( 'button' ) ) {
+
+                    self.save( $this, event );
+
+                } else if ( $this.is( self.element[0].tagName ) || $this.hasClass( placeholderClass ) ) {
+
+                    self.element
+                        .html( self.mutatedHtml( self.value() ) )
+                        .find( self.options.control )
+                            .bind( 'blur', function() {
+                                self.change( $this, event );
+                            })
+                            .focus();
+
                 }
+            })
+            .bind('mouseenter mouseleave', function( event ) {
 
-            } else if ($this.is(self[0].tagName) || $this.hasClass('inlineEdit-placeholder')) {
-                self
-                    .html( mutatedHtml(self.value()) )
-                    .find(control)
-                        .bind('blur', function() {
-                            if (self.timer) {
-                                window.clearTimeout(self.timer);
-                            }
-                            self.timer = window.setTimeout(function() {
-                                self.html(self.value() || placeholderHtml);
-                                self.removeClass(options.hover);
-                            }, 200);
-                        })
-                        .focus();
+                $( this )[event.type === 'mouseenter' ? 'addClass':'removeClass']( self.options.hover );
+
+            });
+
+        },
+
+        initValue: function() {
+            this.value( $.trim( this.element.text() ) || this.options.value );
+            
+            if ( !this.value() ) {
+                this.element.html( $( this.placeholderHtml() ) );
+            } else if ( this.options.value ) {
+                this.element.html( this.options.value );
             }
-        })
-        .hover(
-            function(){
-                $(this).addClass(options.hover);
-            },
-            function(){
-                $(this).removeClass(options.hover);
+        },
+        
+        value: function( newValue ) {
+            if ( arguments.length ) {
+                this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : newValue.replace( /\n/g,"<br />" ) );
             }
-        );
+            return this.element.data( 'value' + namespace );
+        },
 
-        if (!self.value()) {
-            self.html($(placeholderHtml));
-        } else if (options.value) {
-            self.html(options.value);
-        }
-
-        var mutatedHtml = function(value) {
-            if (options.control) {
-                switch (options.control) {
+        mutatedHtml: function( value ) {
+            if ( this.options.control ) {
+                switch ( this.options.control ) {
                     case 'textarea':
-                        return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + '<br /><button>'+ options.buttonText +'</button>';
+                        return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + '<br /><button>'+ this.options.buttonText +'</button>';
                 }
             }
-            return '<input type="text" value="'+ value +'">' + ' <button>'+ options.buttonText +'</button>';
+
+            return '<input type="text" value="'+ value +'">' + ' <button>'+ this.options.buttonText +'</button>';
+        },
+
+        placeholderHtml: function() {
+            return '<span class="'+ placeholderClass +'">'+ this.options.placeholder +'</span>';
+        },
+        
+        save: function( elem, event ) {
+            var hash = {
+                value: $input = elem.siblings( this.options.control ).val()
+            };
+
+            if ( ( $.isFunction( this.options.save ) && this.options.save.call( this, event, hash ) ) !== false || !this.options.save ) {
+                this.value( hash.value );
+            }
+        },
+        
+        change: function( elem, event ) {
+            
+            var self = this;
+            
+            if ( this.timer ) {
+                window.clearTimeout( this.timer );
+            }
+
+            this.timer = window.setTimeout( function() {
+                self.element.html( self.value() || self.placeholderHtml() );
+                self.element.removeClass( self.options.hover );
+            }, 200 );
+
         }
+
     }
+});
 
 })(jQuery);

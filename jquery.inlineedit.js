@@ -107,18 +107,21 @@ $.extend( $.inlineEdit, {
         },
 
         mutatedHtml: function( value ) {
-            if ( this.options.control ) {
-                switch ( this.options.control ) {
-                    case 'textarea':
-                        return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + '<br /><button>'+ this.options.buttonText +'</button>';
-                }
-            }
-
-            return '<input type="text" value="'+ value +'">' + ' <button>'+ this.options.buttonText +'</button>';
+            return this.controls[ this.options.control ].call( this, value );
         },
 
         placeholderHtml: function() {
             return '<span class="'+ placeholderClass +'">'+ this.options.placeholder +'</span>';
+        },
+
+        buttonHtml: function( options ) {
+            var o = $.extend({}, {
+                before: ' ',
+                buttons: '<button>'+ this.options.buttonText +'</button>',
+                after: ''
+            }, options);
+            
+            return o.before + o.buttons + o.after;
         },
         
         save: function( elem, event ) {
@@ -144,7 +147,17 @@ $.extend( $.inlineEdit, {
                 self.element.removeClass( self.options.hover );
             }, 200 );
 
-        }
+        },
+
+		controls: {
+			textarea: function( value ) {
+				return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
+			},
+			input: function( value ) {
+				return '<input type="text" value="'+ value +'">' + this.buttonHtml();
+			}
+		}
+
 
     }
 });

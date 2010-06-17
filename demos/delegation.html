@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>jQuery: Inline Edit Plugin Demo</title>
+<title>jQuery: Inline Edit Plugin Demo - Delegation</title>
 <link rel="stylesheet" href="http://yelotofu.com/labs/jquery/master.css" media="screen">
 <style type="text/css">
     .ui-state-hover { background-color: #ffC }
@@ -13,7 +13,11 @@
 <script type="text/javascript">
 
 $(function(){
+
     $('.editable').inlineEdit();
+
+	$('table').append('<tr><td><span class="editable">John Doe</span></td></tr><tr><td><span class="editable">Paul White</span></td></tr><tr><td><span class="editable"></span></td></tr>');
+
 });
 
 </script>
@@ -24,14 +28,13 @@ $(function(){
             <h1>jQuery: Inline Edit Plugin Demo</h1>
         </div>
         <div id="content">
-            <p>A demonstration of the inline edit plugin.</p>
+            <p>A demonstration of the inline edit plugin with event delegation.</p>
+            
             <table>
                 <tr><td><span class="editable">Joe Blogg</span></td></tr>
-                <tr><td><span class="editable">John Doe</span></td></tr>
-                <tr><td><span class="editable">Paul White</span></td></tr>
-                <tr><td><span class="editable"></span></td></tr>
             </table>
             <br /><br />
+
             <p><a href="http://yelotofu.com/2009/08/jquery-inline-edit-tutorial/">Read original blog post</a></p>
         </div>
     </div>

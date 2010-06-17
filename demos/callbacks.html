@@ -13,7 +13,11 @@
 <script type="text/javascript">
 
 $(function(){
-    $('.editable').inlineEdit();
+    $('.editable').inlineEdit({
+		save: function( event, hash ) {
+			console.log('save:' + hash.value);
+		}
+	});
 });
 
 </script>

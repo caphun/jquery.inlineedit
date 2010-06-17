@@ -18,11 +18,36 @@ var namespace = '.inlineedit',
 // define inlineEdit method
 $.extend( $.fn, {
     inlineEdit: function( options ) {
-        return this.each( function() {
+        var self = this;
 
-            new $.inlineEdit( this, options );
+        return this
 
-        });
+            .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
+                
+                var widget = ( $.inlineEdit.initialised( this ) === false ) 
+                    ? new $.inlineEdit( this, options )
+                    : widget = $( this ).data( 'widget' + namespace ),
+                    unmutated = $( event.target ).is( self.selector );
+
+                    switch ( event.type ) {
+                        case 'click':
+                            if ( unmutated ) {
+                                widget.init();
+                            } else {
+                                widget.mutate();
+                            }
+                            break;
+
+                        case 'mouseover':
+                        case 'mouseout':
+                            if ( unmutated ) {
+                                widget.changeState( event );
+                            }
+                            break;
+                    }
+                
+            });
+
     }
 });
 
@@ -36,7 +61,12 @@ $.inlineEdit = function( elem, options ) {
     this.element = $( elem );
 
     // go!
-    this.init();
+    //this.init();
+}
+
+$.inlineEdit.initialised = function( elem ) {
+    var init = $( elem ).data( 'init' + namespace );
+    return init !== undefined && init !== null ? true : false;
 }
 
 // plugin extensions
@@ -57,35 +87,18 @@ $.extend( $.inlineEdit, {
 
         // initialisation
         init: function() {
-
+            
+            // set initialise flag
+            this.element.data( 'init' + namespace, true );
+            
+            // initialise value
             this.initValue();
 
-            var self = this;
-
-            self.element.bind( 'click', function( event ) {
-                var $this = $( event.target );
-
-                if ( $this.is( 'button' ) ) {
-
-                    self.save( $this, event );
-
-                } else if ( $this.is( self.element[0].tagName ) || $this.hasClass( placeholderClass ) ) {
-
-                    self.element
-                        .html( self.mutatedHtml( self.value() ) )
-                        .find( self.options.control )
-                            .bind( 'blur', function() {
-                                self.change( $this, event );
-                            })
-                            .focus();
-
-                }
-            })
-            .bind('mouseenter mouseleave', function( event ) {
-
-                $( this )[event.type === 'mouseenter' ? 'addClass':'removeClass']( self.options.hover );
-
-            });
+            // mutate
+            this.mutate();
+            
+            // save widget data
+            this.element.data( 'widget' + namespace, this );
 
         },
 
@@ -99,9 +112,27 @@ $.extend( $.inlineEdit, {
             }
         },
         
+        mutate: function() {
+            var self = this;
+
+            return self
+                .element
+                    .html( self.mutatedHtml( self.value() ) )
+                    .find( 'button' )
+                        .bind( 'click', function( event ) {
+                            self.save( self.element, event );
+                        })
+                    .end()
+                    .find( self.options.control )
+                        .bind( 'focusout', function( event ) {
+                            self.change( self.element, event );
+                        })
+                    .focus();
+        },
+        
         value: function( newValue ) {
             if ( arguments.length ) {
-                this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : newValue.replace( /\n/g,"<br />" ) );
+                this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : newValue && newValue.replace( /\n/g,"<br />" ) );
             }
             return this.element.data( 'value' + namespace );
         },
@@ -126,7 +157,7 @@ $.extend( $.inlineEdit, {
         
         save: function( elem, event ) {
             var hash = {
-                value: $input = elem.siblings( this.options.control ).val()
+                value: this.element.find( this.options.control ).val()
             };
 
             if ( ( $.isFunction( this.options.save ) && this.options.save.call( this, event, hash ) ) !== false || !this.options.save ) {
@@ -149,15 +180,18 @@ $.extend( $.inlineEdit, {
 
         },
 
-		controls: {
-			textarea: function( value ) {
-				return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
-			},
-			input: function( value ) {
-				return '<input type="text" value="'+ value +'">' + this.buttonHtml();
-			}
-		}
+        controls: {
+            textarea: function( value ) {
+                return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
+            },
+            input: function( value ) {
+                return '<input type="text" value="'+ value +'">' + this.buttonHtml();
+            }
+        },
 
+        changeState: function( event ) {
+            $( event.target )[event.type === 'mouseover' ? 'addClass':'removeClass']( this.options.hover );
+        }
 
     }
 });

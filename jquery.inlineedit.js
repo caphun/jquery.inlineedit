@@ -41,7 +41,7 @@ $.extend( $.fn, {
                         case 'mouseover':
                         case 'mouseout':
                             if ( unmutated ) {
-                                widget.changeState( event );
+                                widget.hoverClassChange( event );
                             }
                             break;
                     }
@@ -191,7 +191,7 @@ $.extend( $.inlineEdit, {
             }
         },
 
-        changeState: function( event ) {
+        hoverClassChange: function( event ) {
             $( event.target )[event.type === 'mouseover' ? 'addClass':'removeClass']( this.options.hover );
         }
 

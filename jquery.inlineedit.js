@@ -77,7 +77,7 @@ $.extend( $.inlineEdit, {
         hover: 'ui-state-hover',
         value: '',
         save: '',
-        buttonText: 'Save',
+        buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
         placeholder: 'Click to edit',
         control: 'input'
     },
@@ -118,16 +118,18 @@ $.extend( $.inlineEdit, {
             return self
                 .element
                     .html( self.mutatedHtml( self.value() ) )
-                    .find( 'button' )
+                    .find( 'button.save' )
                         .bind( 'click', function( event ) {
                             self.save( self.element, event );
-                        })
-                    .end()
-                    .find( self.options.control )
-                        .bind( 'focusout', function( event ) {
                             self.change( self.element, event );
                         })
-                    .focus();
+                    .end()
+                    .find( 'button.cancel' )
+                        .bind( 'click', function( event ) {
+                            self.change( self.element, event );
+                        })
+                    .end()
+                    .find( self.options.control ).focus();
         },
         
         value: function( newValue ) {
@@ -148,7 +150,7 @@ $.extend( $.inlineEdit, {
         buttonHtml: function( options ) {
             var o = $.extend({}, {
                 before: ' ',
-                buttons: '<button>'+ this.options.buttonText +'</button>',
+                buttons: this.options.buttons,
                 after: ''
             }, options);
             

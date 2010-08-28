@@ -21,12 +21,14 @@ $.extend( $.fn, {
         var self = this;
 
         return this
+        
+            .each( function() {
+                $.inlineEdit.getInstance( this, options ).initValue();
+            })
 
             .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
                 
-                var widget = ( $.inlineEdit.initialised( this ) ) 
-                    ? $( this ).data( 'widget' + namespace )
-                    : new $.inlineEdit( this, options ),
+                var widget = $.inlineEdit.getInstance( this, options ),
                     unmutated = $( event.target ).is( self.selector );
 
                     switch ( event.type ) {
@@ -60,6 +62,12 @@ $.inlineEdit = function( elem, options ) {
     // the original element
     this.element = $( elem );
 
+}
+
+$.inlineEdit.getInstance = function( elem, options ) {
+    return ( $.inlineEdit.initialised( elem ) ) 
+        ? $( elem ).data( 'widget' + namespace )
+        : new $.inlineEdit( elem, options );
 }
 
 $.inlineEdit.initialised = function( elem ) {
@@ -127,7 +135,20 @@ $.extend( $.inlineEdit, {
                             self.change( self.element, event );
                         })
                     .end()
-                    .find( self.options.control ).focus();
+                    .find( self.options.control )
+                        .bind( 'keyup', function( event ) {
+                            switch ( event.keyCode ) {
+                                case 13: // save on ENTER
+                                    self.save( self.element, event );
+                                    self.change( self.element, event );
+                                    break;
+                                case 27: // cancel on ESC
+                                    self.change( self.element, event );
+                                    break;
+                            }
+                        })
+                        .focus()
+                    .end();
         },
         
         value: function( newValue ) {

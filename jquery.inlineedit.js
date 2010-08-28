@@ -139,8 +139,10 @@ $.extend( $.inlineEdit, {
                         .bind( 'keyup', function( event ) {
                             switch ( event.keyCode ) {
                                 case 13: // save on ENTER
-                                    self.save( self.element, event );
-                                    self.change( self.element, event );
+                                    if (self.options.control !== 'textarea') {
+                                        self.save( self.element, event );
+                                        self.change( self.element, event );
+                                    }
                                     break;
                                 case 27: // cancel on ESC
                                     self.change( self.element, event );

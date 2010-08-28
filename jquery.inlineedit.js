@@ -24,9 +24,9 @@ $.extend( $.fn, {
 
             .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
                 
-                var widget = ( $.inlineEdit.initialised( this ) === false ) 
-                    ? new $.inlineEdit( this, options )
-                    : widget = $( this ).data( 'widget' + namespace ),
+                var widget = ( $.inlineEdit.initialised( this ) ) 
+                    ? $( this ).data( 'widget' + namespace )
+                    : new $.inlineEdit( this, options ),
                     unmutated = $( event.target ).is( self.selector );
 
                     switch ( event.type ) {
@@ -60,8 +60,6 @@ $.inlineEdit = function( elem, options ) {
     // the original element
     this.element = $( elem );
 
-    // go!
-    //this.init();
 }
 
 $.inlineEdit.initialised = function( elem ) {

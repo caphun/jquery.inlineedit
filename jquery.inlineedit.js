@@ -21,34 +21,33 @@ $.fn.inlineEdit = function( options ) {
 
     return this
     
-    .each( function() {
-        $.inlineEdit.getInstance( this, options ).initValue();
-    })
+        .each( function() {
+            $.inlineEdit.getInstance( this, options ).initValue();
+        })
 
-    .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
+        .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
         
-        var widget = $.inlineEdit.getInstance( this, options ),
-            mutated = !$( event.target ).is( self.selector );
+            var widget = $.inlineEdit.getInstance( this, options ),
+                mutated = !$( event.target ).is( self.selector );
 
-        switch ( event.type ) {
-        case 'click':
-            if ( !mutated ) {
-            widget.init();
-            } else {
-            widget.mutate();
-            }
-            break;
+            switch ( event.type ) {
+                case 'click':
+                    if ( !mutated ) {
+                        widget.init();
+                    } else {
+                        widget.mutate();
+                    }
+                    break;
 
-        case 'mouseover':
-        case 'mouseout':
-            if ( !mutated ) {
-            widget.hoverClassChange( event );
-            }
-            break;
-        }
+                case 'mouseover':
+                case 'mouseout':
+                    if ( !mutated ) {
+                        widget.hoverClassChange( event );
+                    }
+                    break;
+                }
 
-    });
-
+        });
 }
 
 // plugin constructor
@@ -177,10 +176,10 @@ $.inlineEdit.prototype = {
     
     save: function( elem, event ) {
         var hash = {
-            value: this.element.find( this.options.control ).val()
-        };
+                value: this.element.find( this.options.control ).val()
+            };
 
-        if ( ( $.isFunction( this.options.save ) && this.options.save.call( this, event, hash ) ) !== false || !this.options.save ) {
+        if ( ( $.isFunction( this.options.save ) && this.options.save.call( this.element[0], event, hash ) ) !== false || !this.options.save ) {
             this.value( hash.value );
         }
     },

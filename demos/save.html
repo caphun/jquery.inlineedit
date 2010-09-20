@@ -29,6 +29,8 @@ $(function(){
                 data: { 'action': 'save', 'value': data.value }
             }).responseText;
             
+            alert("id: " + this.id );
+            
             return html === 'OK' ? true : false;
         }
     });
@@ -43,7 +45,7 @@ $(function(){
         </div>
         <div id="content">
             <table>
-                <tr><td><span class="editable"></span></td></tr>
+                <tr><td><span id="editable_01" class="editable"></span></td></tr>
             </table>
         </div>
     </div>

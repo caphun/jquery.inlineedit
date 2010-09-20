@@ -16,42 +16,40 @@ var namespace = '.inlineedit',
     placeholderClass = 'inlineEdit-placeholder';
 
 // define inlineEdit method
-$.extend( $.fn, {
-    inlineEdit: function( options ) {
-        var self = this;
+$.fn.inlineEdit = function( options ) {
+    var self = this;
 
-        return this
+    return this
+    
+    .each( function() {
+        $.inlineEdit.getInstance( this, options ).initValue();
+    })
+
+    .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
         
-            .each( function() {
-                $.inlineEdit.getInstance( this, options ).initValue();
-            })
+        var widget = $.inlineEdit.getInstance( this, options ),
+            mutated = !$( event.target ).is( self.selector );
 
-            .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
-                
-                var widget = $.inlineEdit.getInstance( this, options ),
-                    unmutated = $( event.target ).is( self.selector );
+        switch ( event.type ) {
+        case 'click':
+            if ( !mutated ) {
+            widget.init();
+            } else {
+            widget.mutate();
+            }
+            break;
 
-                    switch ( event.type ) {
-                        case 'click':
-                            if ( unmutated ) {
-                                widget.init();
-                            } else {
-                                widget.mutate();
-                            }
-                            break;
+        case 'mouseover':
+        case 'mouseout':
+            if ( !mutated ) {
+            widget.hoverClassChange( event );
+            }
+            break;
+        }
 
-                        case 'mouseover':
-                        case 'mouseout':
-                            if ( unmutated ) {
-                                widget.hoverClassChange( event );
-                            }
-                            break;
-                    }
-                
-            });
+    });
 
-    }
-});
+}
 
 // plugin constructor
 $.inlineEdit = function( elem, options ) {
@@ -64,159 +62,157 @@ $.inlineEdit = function( elem, options ) {
 
 }
 
+// plugin instance
 $.inlineEdit.getInstance = function( elem, options ) {
     return ( $.inlineEdit.initialised( elem ) ) 
-        ? $( elem ).data( 'widget' + namespace )
-        : new $.inlineEdit( elem, options );
+    ? $( elem ).data( 'widget' + namespace )
+    : new $.inlineEdit( elem, options );
 }
 
+// check if plugin initialised
 $.inlineEdit.initialised = function( elem ) {
     var init = $( elem ).data( 'init' + namespace );
     return init !== undefined && init !== null ? true : false;
 }
 
-// plugin extensions
-$.extend( $.inlineEdit, {
+// plugin defaults
+$.inlineEdit.defaults = {
+    hover: 'ui-state-hover',
+    value: '',
+    save: '',
+    buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
+    placeholder: 'Click to edit',
+    control: 'input'
+};
 
-    // plugin defaults
-    defaults: {
-        hover: 'ui-state-hover',
-        value: '',
-        save: '',
-        buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
-        placeholder: 'Click to edit',
-        control: 'input'
+// plugin prototypes
+$.inlineEdit.prototype = {
+
+    // initialisation
+    init: function() {
+    
+        // set initialise flag
+        this.element.data( 'init' + namespace, true );
+    
+        // initialise value
+        this.initValue();
+
+        // mutate
+        this.mutate();
+    
+        // save widget data
+        this.element.data( 'widget' + namespace, this );
+
     },
 
-    // plugin prototypes
-    prototype: {
+    initValue: function() {
+        this.value( $.trim( this.element.text() ) || this.options.value );
+    
+        if ( !this.value() ) {
+            this.element.html( $( this.placeholderHtml() ) );
+        } else if ( this.options.value ) {
+            this.element.html( this.options.value );
+        }
+    },
+    
+    mutate: function() {
+        var self = this;
 
-        // initialisation
-        init: function() {
-            
-            // set initialise flag
-            this.element.data( 'init' + namespace, true );
-            
-            // initialise value
-            this.initValue();
-
-            // mutate
-            this.mutate();
-            
-            // save widget data
-            this.element.data( 'widget' + namespace, this );
-
-        },
-
-        initValue: function() {
-            this.value( $.trim( this.element.text() ) || this.options.value );
-            
-            if ( !this.value() ) {
-                this.element.html( $( this.placeholderHtml() ) );
-            } else if ( this.options.value ) {
-                this.element.html( this.options.value );
-            }
-        },
-        
-        mutate: function() {
-            var self = this;
-
-            return self
-                .element
-                    .html( self.mutatedHtml( self.value() ) )
-                    .find( 'button.save' )
-                        .bind( 'click', function( event ) {
-                            self.save( self.element, event );
-                            self.change( self.element, event );
-                        })
-                    .end()
-                    .find( 'button.cancel' )
-                        .bind( 'click', function( event ) {
-                            self.change( self.element, event );
-                        })
-                    .end()
-                    .find( self.options.control )
-                        .bind( 'keyup', function( event ) {
-                            switch ( event.keyCode ) {
-                                case 13: // save on ENTER
-                                    if (self.options.control !== 'textarea') {
-                                        self.save( self.element, event );
-                                        self.change( self.element, event );
-                                    }
-                                    break;
-                                case 27: // cancel on ESC
-                                    self.change( self.element, event );
-                                    break;
+        return self
+            .element
+            .html( self.mutatedHtml( self.value() ) )
+            .find( 'button.save' )
+                .bind( 'click', function( event ) {
+                    self.save( self.element, event );
+                    self.change( self.element, event );
+                })
+            .end()
+            .find( 'button.cancel' )
+                .bind( 'click', function( event ) {
+                    self.change( self.element, event );
+                })
+            .end()
+            .find( self.options.control )
+                .bind( 'keyup', function( event ) {
+                    switch ( event.keyCode ) {
+                        case 13: // save on ENTER
+                            if (self.options.control !== 'textarea') {
+                                self.save( self.element, event );
+                                self.change( self.element, event );
                             }
-                        })
-                        .focus()
-                    .end();
-        },
+                            break;
+                        case 27: // cancel on ESC
+                            self.change( self.element, event );
+                            break;
+                    }
+                })
+                .focus()
+            .end();
+    },
+    
+    value: function( newValue ) {
+        if ( arguments.length ) {
+            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : newValue && newValue.replace( /\n/g,"<br />" ) );
+        }
+        return this.element.data( 'value' + namespace );
+    },
+
+    mutatedHtml: function( value ) {
+        return this.controls[ this.options.control ].call( this, value );
+    },
+
+    placeholderHtml: function() {
+        return '<span class="'+ placeholderClass +'">'+ this.options.placeholder +'</span>';
+    },
+
+    buttonHtml: function( options ) {
+        var o = $.extend({}, {
+            before: ' ',
+            buttons: this.options.buttons,
+            after: ''
+        }, options);
         
-        value: function( newValue ) {
-            if ( arguments.length ) {
-                this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : newValue && newValue.replace( /\n/g,"<br />" ) );
-            }
-            return this.element.data( 'value' + namespace );
-        },
+        return o.before + o.buttons + o.after;
+    },
+    
+    save: function( elem, event ) {
+        var hash = {
+            value: this.element.find( this.options.control ).val()
+        };
 
-        mutatedHtml: function( value ) {
-            return this.controls[ this.options.control ].call( this, value );
-        },
-
-        placeholderHtml: function() {
-            return '<span class="'+ placeholderClass +'">'+ this.options.placeholder +'</span>';
-        },
-
-        buttonHtml: function( options ) {
-            var o = $.extend({}, {
-                before: ' ',
-                buttons: this.options.buttons,
-                after: ''
-            }, options);
-            
-            return o.before + o.buttons + o.after;
-        },
+        if ( ( $.isFunction( this.options.save ) && this.options.save.call( this, event, hash ) ) !== false || !this.options.save ) {
+            this.value( hash.value );
+        }
+    },
+    
+    change: function( elem, event ) {
         
-        save: function( elem, event ) {
-            var hash = {
-                value: this.element.find( this.options.control ).val()
-            };
-
-            if ( ( $.isFunction( this.options.save ) && this.options.save.call( this, event, hash ) ) !== false || !this.options.save ) {
-                this.value( hash.value );
-            }
-        },
+        var self = this;
         
-        change: function( elem, event ) {
-            
-            var self = this;
-            
-            if ( this.timer ) {
-                window.clearTimeout( this.timer );
-            }
-
-            this.timer = window.setTimeout( function() {
-                self.element.html( self.value() || self.placeholderHtml() );
-                self.element.removeClass( self.options.hover );
-            }, 200 );
-
-        },
-
-        controls: {
-            textarea: function( value ) {
-                return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
-            },
-            input: function( value ) {
-                return '<input type="text" value="'+ value +'">' + this.buttonHtml();
-            }
-        },
-
-        hoverClassChange: function( event ) {
-            $( event.target )[event.type === 'mouseover' ? 'addClass':'removeClass']( this.options.hover );
+        if ( this.timer ) {
+            window.clearTimeout( this.timer );
         }
 
+        this.timer = window.setTimeout( function() {
+            self.element.html( self.value() || self.placeholderHtml() );
+            self.element.removeClass( self.options.hover );
+        }, 200 );
+
+    },
+
+    controls: {
+        textarea: function( value ) {
+            return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
+        },
+        input: function( value ) {
+            return '<input type="text" value="'+ value +'">' + this.buttonHtml();
+        }
+    },
+
+    hoverClassChange: function( event ) {
+        $( event.target )[event.type === 'mouseover' ? 'addClass':'removeClass']( this.options.hover );
     }
-});
+
+};
 
 })(jQuery);

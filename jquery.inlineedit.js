@@ -205,7 +205,7 @@ $.inlineEdit.prototype = {
             return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
         },
         input: function( value ) {
-            return '<input type="text" value="'+ value +'">' + this.buttonHtml();
+            return '<input type="text" value="'+ value.replace(/(\u0022)+/g, '') +'">' + this.buttonHtml();
         }
     },
 

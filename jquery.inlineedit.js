@@ -25,27 +25,26 @@ $.fn.inlineEdit = function( options ) {
             $.inlineEdit.getInstance( this, options ).initValue();
         })
 
-        .live( ['click','mouseenter','mouseleave'].join(namespace+' '), function( event ) {
-        
+        .live( ['click', 'mouseenter','mouseleave'].join(namespace+' '), function( event ) {
+
             var widget = $.inlineEdit.getInstance( this, options ),
-                mutated = !$( event.target ).is( self.selector );
+                editableElement = widget.element.find( widget.options.control ),
+                mutated = !!editableElement.length;
 
-            switch ( event.type ) {
-                case 'click':
-                    if ( !mutated ) {
-                        widget.init();
-                    } else {
-                        widget.mutate();
-                    }
-                    break;
+            if ( event.target !== editableElement[0] ) {
+                switch ( event.type ) {
+                    case 'click':
+                        widget[ mutated ? 'mutate' : 'init' ]();
+                        break;
 
-                case 'mouseover':
-                case 'mouseout':
-                    if ( !mutated ) {
-                        widget.hoverClassChange( event );
-                    }
-                    break;
+                    case 'mouseover':
+                    case 'mouseout':
+                        if ( !mutated ) {
+                            widget.hoverClassChange( event );
+                        }
+                        break;
                 }
+            }
 
         });
 }
@@ -89,7 +88,7 @@ $.inlineEdit.prototype = {
 
     // initialisation
     init: function() {
-    
+
         // set initialise flag
         this.element.data( 'init' + namespace, true );
     
@@ -124,11 +123,13 @@ $.inlineEdit.prototype = {
                 .bind( 'click', function( event ) {
                     self.save( self.element, event );
                     self.change( self.element, event );
+                    return false;
                 })
             .end()
             .find( 'button.cancel' )
                 .bind( 'click', function( event ) {
                     self.change( self.element, event );
+                    return false;
                 })
             .end()
             .find( self.options.control )

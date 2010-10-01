@@ -36,7 +36,6 @@ $.fn.inlineEdit = function( options ) {
                     case 'click':
                         widget[ mutated ? 'mutate' : 'init' ]();
                         break;
-
                     case 'mouseover':
                     case 'mouseout':
                         if ( !mutated ) {
@@ -80,7 +79,8 @@ $.inlineEdit.defaults = {
     save: '',
     buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
     placeholder: 'Click to edit',
-    control: 'input'
+    control: 'input',
+    cancelOnBlur: false
 };
 
 // plugin prototypes
@@ -133,6 +133,10 @@ $.inlineEdit.prototype = {
                 })
             .end()
             .find( self.options.control )
+                .bind( 'blur', function( event ) {
+                  if (self.options.cancelOnBlur === true)
+                    self.change( self.element, event );
+                })
                 .bind( 'keyup', function( event ) {
                     switch ( event.keyCode ) {
                         case 13: // save on ENTER

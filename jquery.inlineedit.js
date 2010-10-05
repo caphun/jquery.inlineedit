@@ -36,8 +36,8 @@ $.fn.inlineEdit = function( options ) {
                     case 'click':
                         widget[ mutated ? 'mutate' : 'init' ]();
                         break;
-                    case 'mouseover':
-                    case 'mouseout':
+                    case 'mouseenter':
+                    case 'mouseleave':
                         if ( !mutated ) {
                             widget.hoverClassChange( event );
                         }
@@ -48,7 +48,7 @@ $.fn.inlineEdit = function( options ) {
         });
 }
 
-// plugin constructor
+// plugin caka onstructor
 $.inlineEdit = function( elem, options ) {
 
     // deep extend
@@ -116,6 +116,8 @@ $.inlineEdit.prototype = {
     mutate: function() {
         var self = this;
 
+        self.element.removeClass(self.options.hover);
+        
         return self
             .element
             .html( self.mutatedHtml( self.value() ) )
@@ -214,7 +216,7 @@ $.inlineEdit.prototype = {
     },
 
     hoverClassChange: function( event ) {
-        $( event.target )[event.type === 'mouseover' ? 'addClass':'removeClass']( this.options.hover );
+        $( event.target )[event.type === 'mouseenter' ? 'addClass':'removeClass']( this.options.hover );
     }
 
 };

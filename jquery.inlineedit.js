@@ -48,7 +48,7 @@ $.fn.inlineEdit = function( options ) {
         });
 }
 
-// plugin caka onstructor
+// plugin constructor
 $.inlineEdit = function( elem, options ) {
 
     // deep extend

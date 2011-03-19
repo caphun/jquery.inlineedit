@@ -31,6 +31,8 @@ $.fn.inlineEdit = function( options ) {
                 editableElement = widget.element.find( widget.options.control ),
                 mutated = !!editableElement.length;
 
+            widget.element.removeClass( widget.options.hover );
+            
             if ( event.target !== editableElement[0] ) {
                 switch ( event.type ) {
                     case 'click':

@@ -36,8 +36,11 @@ $.fn.inlineEdit = function( options ) {
                     case 'click':
                         widget[ mutated ? 'mutate' : 'init' ]();
                         break;
-                    case 'mouseover':
-                    case 'mouseout':
+
+                    case 'mouseover': // jquery 1.4.x
+                    case 'mouseout': // jquery 1.4.x
+                    case 'mouseenter':
+                    case 'mouseleave':
                         if ( !mutated ) {
                             widget.hoverClassChange( event );
                         }
@@ -214,7 +217,7 @@ $.inlineEdit.prototype = {
     },
 
     hoverClassChange: function( event ) {
-        $( event.target )[event.type === 'mouseover' ? 'addClass':'removeClass']( this.options.hover );
+        $( event.target )[ /mouseover|mouseenter/.test( event.type ) ? 'addClass':'removeClass']( this.options.hover );
     }
 
 };

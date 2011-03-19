@@ -161,7 +161,8 @@ $.inlineEdit.prototype = {
     
     value: function( newValue ) {
         if ( arguments.length ) {
-            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : newValue && newValue.replace( /\n/g,"<br />" ) );
+            var value = newValue === this.options.placeholder ? '' : newValue;
+            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : value && value.replace( /\n/g,"<br />" ) );
         }
         return this.element.data( 'value' + namespace );
     },

@@ -14,9 +14,18 @@
 
 $(function(){
 
-    $('.editable').inlineEdit();
+  $('.editable').inlineEdit();
 
-	$('table').append('<tr><td><span class="editable">John Doe</span></td></tr><tr><td><span class="editable">Paul White</span></td></tr><tr><td><span class="editable"></span></td></tr>');
+  var $person = $('#person');
+  $('button.addrow').click(function(){
+    if ( $person.val().length ) {
+      $('table').append('<tr><td><span class="editable">'+ $person.val() +'</span></td></tr>');
+      $person.val('');
+    } else {
+      alert('please enter a name first');
+    }
+    return false;
+  });
 
 });
 
@@ -29,7 +38,8 @@ $(function(){
         </div>
         <div id="content">
             <p>A demonstration of the inline edit plugin with event delegation.</p>
-            
+            <p>Person: <input type="text" id="person"> <button class="addrow">add</button></p>
+
             <table>
                 <tr><td><span class="editable">Joe Blogg</span></td></tr>
             </table>

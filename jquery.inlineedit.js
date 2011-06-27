@@ -162,7 +162,7 @@ $.inlineEdit.prototype = {
     value: function( newValue ) {
         if ( arguments.length ) {
             var value = newValue === this.options.placeholder ? '' : newValue;
-            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : value && value.replace( /\n/g,"<br />" ) );
+            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : value && this.encodeHtml( value.replace( /\n/g,"<br />" ) ) );
         }
         return this.element.data( 'value' + namespace );
     },
@@ -186,17 +186,20 @@ $.inlineEdit.prototype = {
     },
     
     save: function( elem, event ) {
-        var hash = {
-                value: this.element.find( this.options.control ).val()
+        var $control = this.element.find( this.options.control ), 
+            hash = {
+                value: this.encodeHtml( $control.val() )
             };
 
+        // save value back to control to avoid XSS
+        $control.val(hash.value);
+        
         if ( ( $.isFunction( this.options.save ) && this.options.save.call( this.element[0], event, hash ) ) !== false || !this.options.save ) {
             this.value( hash.value );
         }
     },
     
     change: function( elem, event ) {
-        
         var self = this;
         
         if ( this.timer ) {
@@ -215,12 +218,27 @@ $.inlineEdit.prototype = {
             return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
         },
         input: function( value ) {
-            return '<input type="text" value="'+ value.replace(/(\u0022)+/g, '') +'">' + this.buttonHtml();
+            return '<input type="text" value="'+ value.replace(/(\u0022)+|<\/?script.*>/g, '') +'">' + this.buttonHtml();
         }
     },
 
     hoverClassChange: function( event ) {
         $( event.target )[ /mouseover|mouseenter/.test( event.type ) ? 'addClass':'removeClass']( this.options.hover );
+    },
+    
+    encodeHtml: function( s ) {
+        var encoding = [
+              {key: /</g, value: '&lt;'}, 
+              {key: />/g, value: '&gt;'}, 
+              {key: /"/g, value: '&quot;'}
+            ],
+            value = s;
+
+        $.each(encoding, function(i,n) {
+          value = value.replace(n.key, n.value);
+        });
+
+        return value;
     }
 
 };

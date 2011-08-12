@@ -85,7 +85,8 @@ $.inlineEdit.defaults = {
     buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
     placeholder: 'Click to edit',
     control: 'input',
-    cancelOnBlur: false
+    cancelOnBlur: false,
+    saveOnBlur: true
 };
 
 // plugin prototypes
@@ -141,6 +142,10 @@ $.inlineEdit.prototype = {
                 .bind( 'blur', function( event ) {
                   if (self.options.cancelOnBlur === true)
                     self.change( self.element, event );
+                  else if (self.options.cancelOnBlur == true){
+                    self.save( self.element, event );
+                    self.change( self.element, event );
+                  }
                 })
                 .bind( 'keyup', function( event ) {
                     switch ( event.keyCode ) {

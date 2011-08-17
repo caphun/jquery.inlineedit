@@ -86,7 +86,7 @@ $.inlineEdit.defaults = {
     placeholder: 'Click to edit',
     control: 'input',
     cancelOnBlur: false,
-    saveOnBlur: true
+    saveOnBlur: false
 };
 
 // plugin prototypes

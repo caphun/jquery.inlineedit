@@ -85,6 +85,7 @@ $.inlineEdit.defaults = {
     buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
     placeholder: 'Click to edit',
     control: 'input',
+    myclass: '',
     cancelOnBlur: false,
     saveOnBlur: false
 };
@@ -220,10 +221,10 @@ $.inlineEdit.prototype = {
 
     controls: {
         textarea: function( value ) {
-            return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
+            return '<textarea class="' + this.options.myclass + '">'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
         },
         input: function( value ) {
-            return '<input type="text" value="'+ value.replace(/(\u0022)+/g, '') +'">' + this.buttonHtml();
+            return '<input class="' + this.options.myclass + '" type="text" value="'+ value.replace(/(\u0022)+/g, '') +'">' + this.buttonHtml();
         }
     },
 

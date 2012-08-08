@@ -17,8 +17,6 @@ var namespace = '.inlineedit',
 
 // define inlineEdit method
 $.fn.inlineEdit = function( options ) {
-    var self = this;
-
     return this
     
         .each( function() {
@@ -51,7 +49,7 @@ $.fn.inlineEdit = function( options ) {
             }
 
         });
-}
+};
 
 // plugin constructor
 $.inlineEdit = function( elem, options ) {
@@ -62,20 +60,20 @@ $.inlineEdit = function( elem, options ) {
     // the original element
     this.element = $( elem );
 
-}
+};
 
 // plugin instance
 $.inlineEdit.getInstance = function( elem, options ) {
     return ( $.inlineEdit.initialised( elem ) ) 
     ? $( elem ).data( 'widget' + namespace )
     : new $.inlineEdit( elem, options );
-}
+};
 
 // check if plugin initialised
 $.inlineEdit.initialised = function( elem ) {
     var init = $( elem ).data( 'init' + namespace );
-    return init !== undefined && init !== null ? true : false;
-}
+    return init !== undefined && init !== null;
+};
 
 // plugin defaults
 $.inlineEdit.defaults = {
@@ -140,8 +138,9 @@ $.inlineEdit.prototype = {
             .end()
             .find( self.options.control )
                 .bind( 'blur', function( event ) {
-                  if (self.options.cancelOnBlur === true)
+                  if (self.options.cancelOnBlur === true){
                     self.change( self.element, event );
+                  }
                   else if (self.options.saveOnBlur == true){
                     self.save( self.element, event );
                     self.change( self.element, event );
@@ -190,7 +189,7 @@ $.inlineEdit.prototype = {
         return o.before + o.buttons + o.after;
     },
     
-    save: function( elem, event ) {
+    save: function( /*elem, event*/ ) {
         var $control = this.element.find( this.options.control ), 
             hash = {
                 value: this.encodeHtml( $control.val() )
@@ -248,4 +247,4 @@ $.inlineEdit.prototype = {
 
 };
 
-})(jQuery);
+}(jQuery));

@@ -83,6 +83,7 @@ $.inlineEdit.defaults = {
     value: '',
     save: '',
     buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
+    buttonsTag: 'button',
     placeholder: 'Click to edit',
     control: 'input',
     cancelOnBlur: false,
@@ -125,14 +126,14 @@ $.inlineEdit.prototype = {
         return self
             .element
             .html( self.mutatedHtml( self.value() ) )
-            .find( 'button.save' )
+            .find( this.options.buttonsTag + '.save' )
                 .bind( 'click', function( event ) {
                     self.save( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
             .end()
-            .find( 'button.cancel' )
+            .find( this.options.buttonsTag + '.cancel' )
                 .bind( 'click', function( event ) {
                     self.change( self.element, event );
                     return false;

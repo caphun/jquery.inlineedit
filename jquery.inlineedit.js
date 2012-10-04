@@ -142,10 +142,10 @@ $.inlineEdit.prototype = {
             .end()
             .find( self.options.control )
                 .bind( 'blur', function( event ) {
-                  if (self.options.cancelOnBlur === true)
+                  if (self.options.cancelOnBlur === true) {
                     self.cancel( self.element, event );
                     self.change( self.element, event );
-                  else if (self.options.saveOnBlur == true){
+                  } else if (self.options.saveOnBlur == true){
                     self.save( self.element, event );
                     self.change( self.element, event );
                   }
@@ -214,11 +214,11 @@ $.inlineEdit.prototype = {
                 value: this.encodeHtml( $control.val() )
             };
 
-        // save value back to control to avoid XSS
+        // save value back to cosntrol to avoid XSS
         $control.val(hash.value);
         
         if ( ( $.isFunction( this.options.cancel ) && this.options.cancel.call( this.element[0], event, hash ) ) !== false || !this.options.cancel ) {
-            this.value( hash.value );
+            // nothing to do here!
         }
     },
     

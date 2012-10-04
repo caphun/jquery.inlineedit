@@ -80,10 +80,11 @@ $.inlineEdit.initialised = function( elem ) {
 // plugin defaults
 $.inlineEdit.defaults = {
     hover: 'ui-state-hover',
+    editInProgress: 'edit-in-progress',
     value: '',
     save: '',
 	cancel: '', 
-    buttons: '<button class="editable-save-button">save</button> <button class="editable-cancel-button">cancel</button>',
+    buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
     placeholder: 'Click to edit',
     control: 'input',
     cancelOnBlur: false,
@@ -126,14 +127,15 @@ $.inlineEdit.prototype = {
         return self
             .element
             .html( self.mutatedHtml( self.value() ) )
-            .find( '.editable-save-button' )
+            .addClass( self.options.editInProgress )
+            .find( 'button.save' )
                 .bind( 'click', function( event ) {
                     self.save( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
             .end()
-            .find( '.editable-cancel-button' )
+            .find( 'button.cancel' )
                 .bind( 'click', function( event ) {
 					self.cancel( self.element, event );
                     self.change( self.element, event );
@@ -232,6 +234,7 @@ $.inlineEdit.prototype = {
         this.timer = window.setTimeout( function() {
             self.element.html( self.value() || self.placeholderHtml() );
             self.element.removeClass( self.options.hover );
+            self.element.removeClass( self.options.editInProgress );
         }, 200 );
 
     },

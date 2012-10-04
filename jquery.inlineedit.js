@@ -143,6 +143,7 @@ $.inlineEdit.prototype = {
             .find( self.options.control )
                 .bind( 'blur', function( event ) {
                   if (self.options.cancelOnBlur === true)
+                    self.cancel( self.element, event );
                     self.change( self.element, event );
                   else if (self.options.saveOnBlur == true){
                     self.save( self.element, event );
@@ -158,6 +159,7 @@ $.inlineEdit.prototype = {
                             }
                             break;
                         case 27: // cancel on ESC
+                            self.cancel( self.element, event );
                             self.change( self.element, event );
                             break;
                     }

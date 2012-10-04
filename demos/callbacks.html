@@ -19,7 +19,13 @@ $(function(){
 			  'value: ' + hash.value + "\n" +
 			  'id: ' + this.id
 			);
-		}
+		}, 
+        cancel: function( event, hash ) {
+            alert(
+              'value: ' + hash.value + "\n" +
+              'id: ' + this.id
+            );
+        }
 	});
 });
 

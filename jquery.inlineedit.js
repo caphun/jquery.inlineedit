@@ -82,7 +82,8 @@ $.inlineEdit.defaults = {
     hover: 'ui-state-hover',
     value: '',
     save: '',
-    buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
+	cancel: '', 
+    buttons: '<button class="editable-save-button">save</button> <button class="editable-cancel-button">cancel</button>',
     placeholder: 'Click to edit',
     control: 'input',
     cancelOnBlur: false,
@@ -125,15 +126,16 @@ $.inlineEdit.prototype = {
         return self
             .element
             .html( self.mutatedHtml( self.value() ) )
-            .find( 'button.save' )
+            .find( '.editable-save-button' )
                 .bind( 'click', function( event ) {
                     self.save( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
             .end()
-            .find( 'button.cancel' )
+            .find( '.editable-cancel-button' )
                 .bind( 'click', function( event ) {
+					self.cancel( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
@@ -204,6 +206,20 @@ $.inlineEdit.prototype = {
         }
     },
     
+	cancel: function( elem, event ) {
+        var $control = this.element.find( this.options.control ), 
+            hash = {
+                value: this.encodeHtml( $control.val() )
+            };
+
+        // save value back to control to avoid XSS
+        $control.val(hash.value);
+        
+        if ( ( $.isFunction( this.options.cancel ) && this.options.cancel.call( this.element[0], event, hash ) ) !== false || !this.options.cancel ) {
+            this.value( hash.value );
+        }
+    },
+    
     change: function( elem, event ) {
         var self = this;
         
@@ -220,7 +236,7 @@ $.inlineEdit.prototype = {
 
     controls: {
         textarea: function( value ) {
-            return '<textarea>'+ value.replace(/<br\s?\/?>/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
+            return '<textarea>'+ value.replace(/\&lt;br\s?\/&gt;/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
         },
         input: function( value ) {
             return '<input type="text" value="'+ value.replace(/(\u0022)+/g, '') +'"/>' + this.buttonHtml();

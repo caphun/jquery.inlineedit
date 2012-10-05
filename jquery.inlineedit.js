@@ -228,12 +228,13 @@ $.inlineEdit.prototype = {
     change: function( elem, event ) {
         var self = this;
         
+        self.element.html( self.value() || self.placeholderHtml() );
+
         if ( this.timer ) {
             window.clearTimeout( this.timer );
         }
 
         this.timer = window.setTimeout( function() {
-            self.element.html( self.value() || self.placeholderHtml() );
             self.element.removeClass( self.options.hover );
             self.element.removeClass( self.options.editInProgress );
         }, 200 );

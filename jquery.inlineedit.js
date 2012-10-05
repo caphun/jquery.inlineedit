@@ -20,7 +20,7 @@ $.fn.inlineEdit = function( options ) {
     var self = this;
 
     return this
-    
+
         .each( function() {
             $.inlineEdit.getInstance( this, options ).initValue();
         })
@@ -32,7 +32,7 @@ $.fn.inlineEdit = function( options ) {
                 mutated = !!editableElement.length;
 
             widget.element.removeClass( widget.options.hover );
-            
+
             if ( event.target !== editableElement[0] ) {
                 switch ( event.type ) {
                     case 'click':
@@ -66,7 +66,7 @@ $.inlineEdit = function( elem, options ) {
 
 // plugin instance
 $.inlineEdit.getInstance = function( elem, options ) {
-    return ( $.inlineEdit.initialised( elem ) ) 
+    return ( $.inlineEdit.initialised( elem ) )
     ? $( elem ).data( 'widget' + namespace )
     : new $.inlineEdit( elem, options );
 }
@@ -83,7 +83,7 @@ $.inlineEdit.defaults = {
     editInProgress: 'edit-in-progress',
     value: '',
     save: '',
-	cancel: '', 
+    cancel: '',
     buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
     buttonsTag: 'button',
     placeholder: 'Click to edit',
@@ -100,13 +100,13 @@ $.inlineEdit.prototype = {
 
         // set initialise flag
         this.element.data( 'init' + namespace, true );
-    
+
         // initialise value
         this.initValue();
 
         // mutate
         this.mutate();
-    
+
         // save widget data
         this.element.data( 'widget' + namespace, this );
 
@@ -114,14 +114,14 @@ $.inlineEdit.prototype = {
 
     initValue: function() {
         this.value( $.trim( this.element.text() ) || this.options.value );
-    
+
         if ( !this.value() ) {
             this.element.html( $( this.placeholderHtml() ) );
         } else if ( this.options.value ) {
             this.element.html( this.options.value );
         }
     },
-    
+
     mutate: function() {
         var self = this;
 
@@ -138,7 +138,7 @@ $.inlineEdit.prototype = {
             .end()
             .find( this.options.buttonsTag + '.cancel' )
                 .bind( 'click', function( event ) {
-					self.cancel( self.element, event );
+                    self.cancel( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
@@ -170,7 +170,7 @@ $.inlineEdit.prototype = {
                 .focus()
             .end();
     },
-    
+
     value: function( newValue ) {
         if ( arguments.length ) {
             var value = newValue === this.options.placeholder ? '' : newValue;
@@ -193,47 +193,48 @@ $.inlineEdit.prototype = {
             buttons: this.options.buttons,
             after: ''
         }, options);
-        
+
         return o.before + o.buttons + o.after;
     },
-    
+
     save: function( elem, event ) {
-        var $control = this.element.find( this.options.control ), 
+        var $control = this.element.find( this.options.control ),
             hash = {
                 value: this.encodeHtml( $control.val() )
             };
 
         // save value back to control to avoid XSS
         $control.val(hash.value);
-        
+
         if ( ( $.isFunction( this.options.save ) && this.options.save.call( this.element[0], event, hash ) ) !== false || !this.options.save ) {
             this.value( hash.value );
         }
     },
-    
-	cancel: function( elem, event ) {
-        var $control = this.element.find( this.options.control ), 
+
+    cancel: function( elem, event ) {
+        var $control = this.element.find( this.options.control ),
             hash = {
                 value: this.encodeHtml( $control.val() )
             };
 
-        // save value back to cosntrol to avoid XSS
+        // save value back to control to avoid XSS
         $control.val(hash.value);
-        
+
         if ( ( $.isFunction( this.options.cancel ) && this.options.cancel.call( this.element[0], event, hash ) ) !== false || !this.options.cancel ) {
             // nothing to do here!
         }
     },
-    
+
     change: function( elem, event ) {
         var self = this;
-        
+
+        self.element.html( self.value() || self.placeholderHtml() );
+
         if ( this.timer ) {
             window.clearTimeout( this.timer );
         }
 
         this.timer = window.setTimeout( function() {
-            self.element.html( self.value() || self.placeholderHtml() );
             self.element.removeClass( self.options.hover );
             self.element.removeClass( self.options.editInProgress );
         }, 200 );
@@ -252,11 +253,11 @@ $.inlineEdit.prototype = {
     hoverClassChange: function( event ) {
         $( event.target )[ /mouseover|mouseenter/.test( event.type ) ? 'addClass':'removeClass']( this.options.hover );
     },
-    
+
     encodeHtml: function( s ) {
         var encoding = [
-              {key: /</g, value: '&lt;'}, 
-              {key: />/g, value: '&gt;'}, 
+              {key: /</g, value: '&lt;'},
+              {key: />/g, value: '&gt;'},
               {key: /"/g, value: '&quot;'}
             ],
             value = s;

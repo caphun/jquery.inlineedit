@@ -125,7 +125,7 @@ $.inlineEdit.prototype = {
     mutate: function() {
         var self = this;
 
-        return self
+        var r = self
             .element
             .html( self.mutatedHtml( self.value() ) )
             .addClass( self.options.editInProgress )
@@ -169,6 +169,13 @@ $.inlineEdit.prototype = {
                 })
                 .focus()
             .end();
+        
+        // Function called after placeholder is initialized
+        if ($.isFunction( this.options.afterRender) && typeof(self.element[0]) !== 'undefined'){
+        	 this.options.afterRender(self.element[0]);
+        }
+        
+        return r;
     },
     
     value: function( newValue ) {
@@ -232,8 +239,9 @@ $.inlineEdit.prototype = {
             window.clearTimeout( this.timer );
         }
 
+	// Restore initial state of the element, Restore linebreaks
         this.timer = window.setTimeout( function() {
-            self.element.html( self.value() || self.placeholderHtml() );
+            self.element.html( self.value().replace(/\&lt;br\s*?\/&gt;/g,"<br/>\n") || self.placeholderHtml() );
             self.element.removeClass( self.options.hover );
             self.element.removeClass( self.options.editInProgress );
         }, 200 );

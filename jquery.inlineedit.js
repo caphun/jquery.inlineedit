@@ -83,13 +83,14 @@ $.inlineEdit.defaults = {
     editInProgress: 'edit-in-progress',
     value: '',
     save: '',
-	cancel: '', 
+    cancel: '', 
     buttons: '<button class="save">save</button> <button class="cancel">cancel</button>',
-    buttonsTag: 'button',
     placeholder: 'Click to edit',
     control: 'input',
     cancelOnBlur: false,
-    saveOnBlur: false
+    saveOnBlur: false,
+    nl2br: true,
+    debug: false
 };
 
 // plugin prototypes
@@ -113,7 +114,8 @@ $.inlineEdit.prototype = {
     },
 
     initValue: function() {
-        this.value( $.trim( this.element.text() ) || this.options.value );
+
+        this.value( $.trim( this.element.data('original-content') || this.element.html() ) || this.options.value );
     
         if ( !this.value() ) {
             this.element.html( $( this.placeholderHtml() ) );
@@ -124,21 +126,25 @@ $.inlineEdit.prototype = {
     
     mutate: function() {
         var self = this;
+        //console.log('mutate', self.value());
+
+        // save a copy of self before mutation (useful for cancel)
+        self.prevValue( self.element.html() );
 
         return self
             .element
             .html( self.mutatedHtml( self.value() ) )
             .addClass( self.options.editInProgress )
-            .find( this.options.buttonsTag + '.save' )
+            .find( '.save' )
                 .bind( 'click', function( event ) {
                     self.save( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
             .end()
-            .find( this.options.buttonsTag + '.cancel' )
+            .find( '.cancel' )
                 .bind( 'click', function( event ) {
-					self.cancel( self.element, event );
+                    self.cancel( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
@@ -174,12 +180,23 @@ $.inlineEdit.prototype = {
     value: function( newValue ) {
         if ( arguments.length ) {
             var value = newValue === this.options.placeholder ? '' : newValue;
-            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : value && this.encodeHtml( value.replace( /\n/g,"<br />" ) ) );
+            this._debug('value:','to save', value);
+            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : value && this.encodeHtml( this.nl2br(value) ) );
+            this._debug('value:','saved', this.element.data( 'value' + namespace ));
         }
-        return this.element.data( 'value' + namespace );
+        return this._decodeHtml( this.element.data( 'value' + namespace) );
+    },
+
+    prevValue: function( newValue ) {
+        if ( arguments.length ) {
+            var value = newValue === this.options.placeholder ? '' : newValue;
+            this.element.data('prev_value' + namespace, value);
+        }
+        return this.element.data( 'prev_value' + namespace );
     },
 
     mutatedHtml: function( value ) {
+        //console.log('mutatedHtml', value);
         return this.controls[ this.options.control ].call( this, value );
     },
 
@@ -203,25 +220,30 @@ $.inlineEdit.prototype = {
                 value: this.encodeHtml( $control.val() )
             };
 
+        this._debug('save:',"Saving...");
+
         // save value back to control to avoid XSS
         $control.val(hash.value);
         
-        if ( ( $.isFunction( this.options.save ) && this.options.save.call( this.element[0], event, hash ) ) !== false || !this.options.save ) {
+        //if ( ( $.isFunction( this.options.save ) && this.options.save.call( this.element[0], event, hash, this ) ) !== false || !this.options.save ) {
+        if (this._callback('save', [event, hash, this])) {
             this.value( hash.value );
+            this._debug( 'save:', 'Current stored value', this.value() );
         }
     },
     
-	cancel: function( elem, event ) {
+    cancel: function( elem, event ) {
         var $control = this.element.find( this.options.control ), 
             hash = {
                 value: this.encodeHtml( $control.val() )
             };
 
-        // save value back to cosntrol to avoid XSS
-        $control.val(hash.value);
-        
-        if ( ( $.isFunction( this.options.cancel ) && this.options.cancel.call( this.element[0], event, hash ) ) !== false || !this.options.cancel ) {
-            // nothing to do here!
+        this._debug('cancel:', "Cancelling...");
+
+        //if ( ( $.isFunction( this.options.cancel ) && this.options.cancel.call( this.element[0], event, hash, this ) ) !== false || !this.options.cancel ) {
+        if (this._callback('cancel', [event, hash, this])) {
+            this.value( this.prevValue() ); // put back previous value
+            this._debug( 'cancel:', 'Current stored value', this.value() );
         }
     },
     
@@ -233,16 +255,19 @@ $.inlineEdit.prototype = {
         }
 
         this.timer = window.setTimeout( function() {
+            self._debug( 'change:', 'Change', self.value() );
             self.element.html( self.value() || self.placeholderHtml() );
             self.element.removeClass( self.options.hover );
             self.element.removeClass( self.options.editInProgress );
+            self._callback( 'change', [event, self] );
+            self._debug( 'change:', 'Change complete' );
         }, 200 );
 
     },
 
     controls: {
         textarea: function( value ) {
-            return '<textarea>'+ value.replace(/\&lt;br\s?\/&gt;/g,"\n") +'</textarea>' + this.buttonHtml( { before: '<br />' } );
+            return '<textarea>'+ this.br2nl(value) +'</textarea>' + this.buttonHtml( { before: '<br />' } );
         },
         input: function( value ) {
             return '<input type="text" value="'+ value.replace(/(\u0022)+/g, '') +'"/>' + this.buttonHtml();
@@ -255,8 +280,8 @@ $.inlineEdit.prototype = {
     
     encodeHtml: function( s ) {
         var encoding = [
-              {key: /</g, value: '&lt;'}, 
-              {key: />/g, value: '&gt;'}, 
+              {key: /</g, value: '<'},
+              {key: />/g, value: '>'},
               {key: /"/g, value: '&quot;'}
             ],
             value = s;
@@ -266,6 +291,32 @@ $.inlineEdit.prototype = {
         });
 
         return value;
+    },
+
+    br2nl: function( val ) {
+        return this.options.nl2br ? val.replace( /<br\s?\/?>/g, "\n" ) : val;
+    },
+
+    nl2br: function( val ) {
+        return this.options.nl2br ? val.replace( /\n/g, "<br />" ) : val;
+    },
+
+    _debug: function() {
+
+        if (this.options && this.options.debug) {
+            return window.console && console.log.call(console, arguments);
+        }
+
+    },
+
+    _callback: function( fn, args ) {
+        return ($.isFunction( this.options[fn] ) && this.options[fn].apply( this.element[0], args ) ) !== false || !this.options[fn];
+    },
+
+    _decodeHtml: function( encoded ) {
+        var decoded = encoded.replace(/&quot;/g,'"');
+        this._debug('_decodeHtml:', decoded);
+        return decoded;
     }
 
 };

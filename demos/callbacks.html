@@ -14,18 +14,27 @@
 
 $(function(){
     $('.editable').inlineEdit({
-		save: function( event, hash ) {
-			alert(
-			  'value: ' + hash.value + "\n" +
+		save: function( event, hash, widget ) {
+			widget._debug(
+              'save callback',
+			  'value: ' + hash.value + "\n",
 			  'id: ' + this.id
 			);
 		}, 
-        cancel: function( event, hash ) {
-            alert(
-              'value: ' + hash.value + "\n" +
+        cancel: function( event, hash, widget ) {
+            widget._debug(
+              'cancel callback',
+              'value: ' + hash.value + "\n",
               'id: ' + this.id
             );
-        }
+        },
+        change: function( evemt, widget ) {
+            widget._debug(
+              'change callback',
+              'id: ' + this.id
+            );            
+        },
+        debug: true
 	});
 });
 
@@ -37,7 +46,7 @@ $(function(){
             <h1>jQuery: Inline Edit Plugin Demo</h1>
         </div>
         <div id="content">
-            <p>A demonstration of the inline edit plugin.</p>
+            <p>A demonstration of the inline edit plugin with debug on<br>(please view your console log to see the debugging info).</p>
             <table>
                 <tr><td><span id="editable_01" class="editable">Joe Blogg</span></td></tr>
                 <tr><td><span id="editable_02" class="editable">John Doe</span></td></tr>

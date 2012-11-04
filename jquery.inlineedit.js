@@ -179,9 +179,9 @@ $.inlineEdit.prototype = {
     
     value: function( newValue ) {
         if ( arguments.length ) {
-            var value = newValue === this.options.placeholder ? '' : newValue;
+            var value = $(newValue).text() === this.options.placeholder ? '' : newValue;
             this._debug('value:','to save', value);
-            this.element.data( 'value' + namespace, $( '.' + placeholderClass, this ).length ? '' : value && this.encodeHtml( this.nl2br(value) ) );
+            this.element.data( 'value' + namespace, value && this.encodeHtml( this.nl2br(value) ) );
             this._debug('value:','saved', this.element.data( 'value' + namespace ));
         }
         return this._decodeHtml( this.element.data( 'value' + namespace) );

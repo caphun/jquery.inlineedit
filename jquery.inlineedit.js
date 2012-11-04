@@ -275,7 +275,7 @@ $.inlineEdit.prototype = {
     },
 
     hoverClassChange: function( event ) {
-        $( event.target )[ /mouseover|mouseenter/.test( event.type ) ? 'addClass':'removeClass']( this.options.hover );
+        $( this.element )[ /mouseover|mouseenter/.test( event.type ) ? 'addClass':'removeClass']( this.options.hover );
     },
     
     encodeHtml: function( s ) {

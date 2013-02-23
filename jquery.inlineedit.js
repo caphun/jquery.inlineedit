@@ -32,8 +32,7 @@ $.fn.inlineEdit = function( options ) {
                 mutated = !!editableElement.length;
 
             widget.element.removeClass( widget.options.hover );
-            
-            if ( event.target !== editableElement[0] ) {
+            if ( editableElement[0] != event.target  && editableElement.has(event.target).length == 0 ) {
                 switch ( event.type ) {
                     case 'click':
                         widget[ mutated ? 'mutate' : 'init' ]();
@@ -213,7 +212,7 @@ $.inlineEdit.prototype = {
         
         return o.before + o.buttons + o.after;
     },
-    
+
     save: function( elem, event ) {
         var $control = this.element.find( this.options.control ), 
             hash = {

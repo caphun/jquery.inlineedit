@@ -25,7 +25,7 @@ $.fn.inlineEdit = function( options ) {
             $.inlineEdit.getInstance( this, options ).initValue();
         })
 
-        .live( ['click', 'mouseenter','mouseleave'].join(namespace+' '), function( event ) {
+        .on( ['click', 'mouseenter','mouseleave'].join(namespace+' '), function( event ) {
 
             var widget = $.inlineEdit.getInstance( this, options ),
                 editableElement = widget.element.find( widget.options.control ),

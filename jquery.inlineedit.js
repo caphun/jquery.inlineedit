@@ -9,7 +9,13 @@
  * Inline (in-place) editing.
  */
 
-(function($) {
+(function( factory ) {
+    if ( typeof define === 'function' && define.amd ) {
+        define( ['jquery'], factory );
+    } else {
+        factory( jQuery );
+    }
+}(function( $ ) {
 
 // cached values
 var namespace = '.inlineedit',
@@ -327,4 +333,4 @@ $.inlineEdit.prototype = {
 
 };
 
-})(jQuery);
+}));

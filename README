@@ -6,8 +6,9 @@ See original post at http://yelotofu.com/2009/08/jquery-inline-edit-tutorial/
 
 But as interest in something simple grew so has the code. This plugin has the following supported features:
 
-* works with .live() so you do not need to re-bind new DOM elements in-order to make them editable
+* works with .on() with legacy support for .live() so you do not need to re-bind new DOM elements in-order to make them editable
 * supports input and textarea elements. other elements supported by extending $.inlineEdit.prototype.controls
 * custom placeholder text for empty areas, defaults to "Click to edit"
 * custom callbacks and cancellable actions via return false.
 * keyboard support. ENTER to save and ESC to cancel.
+* Can be loaded as an AMD module.

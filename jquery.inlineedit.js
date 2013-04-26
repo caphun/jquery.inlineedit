@@ -13,43 +13,50 @@
 
 // cached values
 var namespace = '.inlineedit',
-    placeholderClass = 'inlineEdit-placeholder';
+    placeholderClass = 'inlineEdit-placeholder',
+    events = ['click', 'mouseenter','mouseleave'].join(namespace+' ');
 
 // define inlineEdit method
 $.fn.inlineEdit = function( options ) {
-    var self = this;
 
-    return this
-    
-        .each( function() {
-            $.inlineEdit.getInstance( this, options ).initValue();
-        })
+    this.each( function() {
+        $.inlineEdit.getInstance( this, options ).initValue();
+    });
 
-        .live( ['click', 'mouseenter','mouseleave'].join(namespace+' '), function( event ) {
+    var cbBindings = function( event ) {
+            bindings.apply( this, [event] );
+        };
 
-            var widget = $.inlineEdit.getInstance( this, options ),
-                editableElement = widget.element.find( widget.options.control ),
-                mutated = !!editableElement.length;
+    if ($.fn.on) {
+        $(this.context).on( events, this.selector, cbBindings );
+    } else {
+        // legacy support
+        $(this).live( events, cbBindings );
+    }
 
-            widget.element.removeClass( widget.options.hover );
-            if ( editableElement[0] != event.target  && editableElement.has(event.target).length == 0 ) {
-                switch ( event.type ) {
-                    case 'click':
-                        widget[ mutated ? 'mutate' : 'init' ]();
-                        break;
+    function bindings( event ) {
+        var widget = $.inlineEdit.getInstance( this, options ),
+            editableElement = widget.element.find( widget.options.control ),
+            mutated = !!editableElement.length;
 
-                    case 'mouseover': // jquery 1.4.x
-                    case 'mouseout': // jquery 1.4.x
-                    case 'mouseenter':
-                    case 'mouseleave':
-                        if ( !mutated ) {
-                            widget.hoverClassChange( event );
-                        }
-                        break;
-                }
+        widget.element.removeClass( widget.options.hover );
+        if ( editableElement[0] != event.target  && editableElement.has(event.target).length == 0 ) {
+            switch ( event.type ) {
+                case 'click':
+                    widget[ mutated ? 'mutate' : 'init' ]();
+                    break;
+
+                case 'mouseover': // jquery 1.4.x
+                case 'mouseout': // jquery 1.4.x
+                case 'mouseenter':
+                case 'mouseleave':
+                    if ( !mutated ) {
+                        widget.hoverClassChange( event );
+                    }
+                    break;
             }
-
-        });
+        }
+    }
 }
 
 // plugin constructor

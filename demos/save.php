@@ -10,7 +10,7 @@ switch ($action) {
     // retrieve data
     case 'get':
         //echo file_get_contents('data.txt');
-        echo $data;
+        echo htmlentities($data);
         break;
 
     // save data

@@ -229,7 +229,6 @@ $.inlineEdit.prototype = {
     save: function( elem, event ) {
         var $control = this.element.find( this.options.control ), 
             hash = {
-                //value: this.encodeHtml( $control.val() )
                 value: $control.val()
             };
 

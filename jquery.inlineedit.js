@@ -102,7 +102,8 @@ $.inlineEdit.defaults = {
     cancelOnBlur: false,
     saveOnBlur: false,
     nl2br: true,
-    debug: false
+    debug: false,
+    mutate: ''
 };
 
 // plugin prototypes
@@ -138,12 +139,11 @@ $.inlineEdit.prototype = {
     
     mutate: function() {
         var self = this;
-        //console.log('mutate', self.value());
 
         // save a copy of self before mutation (useful for cancel)
         self.prevValue( self.element.html() );
 
-        return self
+        self
             .element
             .html( self.mutatedHtml( self.value() ) )
             .addClass( self.options.editInProgress )
@@ -187,6 +187,13 @@ $.inlineEdit.prototype = {
                 })
                 .focus()
             .end();
+
+        // trigger mutate event on mutation (i.e. edit-in-progress)
+        if (this._callback('mutate', [event, this])) {
+            this._debug( 'mutate:', 'Current stored value', this.value() );
+        }
+
+        return this;
     },
     
     value: function( newValue ) {

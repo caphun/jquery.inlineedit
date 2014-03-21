@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
+
 $action = isset($_POST) && $_POST['action'] ? $_POST['action'] : 'get';
 $value  = isset($_POST) && $_POST['value'] ? $_POST['value'] : '';
 

@@ -74,20 +74,20 @@ $.inlineEdit = function( elem, options ) {
     // the original element
     this.element = $( elem );
 
-}
+};
 
 // plugin instance
 $.inlineEdit.getInstance = function( elem, options ) {
     return ( $.inlineEdit.initialised( elem ) ) 
     ? $( elem ).data( 'widget' + namespace )
     : new $.inlineEdit( elem, options );
-}
+};
 
 // check if plugin initialised
 $.inlineEdit.initialised = function( elem ) {
     var init = $( elem ).data( 'init' + namespace );
     return init !== undefined && init !== null ? true : false;
-}
+};
 
 // plugin defaults
 $.inlineEdit.defaults = {
@@ -200,7 +200,7 @@ $.inlineEdit.prototype = {
         if ( arguments.length ) {
             var value = newValue == this.placeholderHtml() ? '' : newValue;
             this._debug('value:','to save', value);
-            this.element.data( 'value' + namespace, value && this.encodeHtml( this.nl2br(value) ) );
+            this.element.data( 'value' + namespace, value && ( this.nl2br(value) ) );
             this._debug('value:','saved', this.element.data( 'value' + namespace ));
         }
         return this._decodeHtml( this.element.data( 'value' + namespace) );
@@ -236,7 +236,7 @@ $.inlineEdit.prototype = {
     save: function( elem, event ) {
         var $control = this.element.find( this.options.control ), 
             hash = {
-                value: this.encodeHtml( $control.val() )
+                value: $control.val()
             };
 
         this._debug('save:',"Saving...");
@@ -275,7 +275,7 @@ $.inlineEdit.prototype = {
 
         this.timer = window.setTimeout( function() {
             self._debug( 'change:', 'Change', self.value() );
-            self.element.html( self.value() || self.placeholderHtml() );
+            self.element.html( self.encodeHtml(self.value()) || self.placeholderHtml() );
             self.element.removeClass( self.options.hover );
             self.element.removeClass( self.options.editInProgress );
             self._callback( 'change', [event, self] );
@@ -299,8 +299,8 @@ $.inlineEdit.prototype = {
     
     encodeHtml: function( s ) {
         var encoding = [
-              {key: /</g, value: '<'},
-              {key: />/g, value: '>'},
+              {key: /</g, value: '&lt;'},
+              {key: />/g, value: '&gt;'},
               {key: /"/g, value: '&quot;'}
             ],
             value = s;
@@ -334,6 +334,8 @@ $.inlineEdit.prototype = {
 
     _decodeHtml: function( encoded ) {
         var decoded = encoded.replace(/&quot;/g,'"');
+        decoded = decoded.replace(/&lt;/g,'<');
+        decoded = decoded.replace(/&gt;/g,'>');
         this._debug('_decodeHtml:', decoded);
         return decoded;
     }

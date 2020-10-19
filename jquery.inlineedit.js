@@ -25,20 +25,14 @@ var namespace = '.inlineedit',
 // define inlineEdit method
 $.fn.inlineEdit = function( options ) {
 
+	var cbBindings = function( event ) {
+		bindings.apply( this, [event] );
+	};
+
     this.each( function() {
         $.inlineEdit.getInstance( this, options ).initValue();
+        $(this).on( events, cbBindings );
     });
-
-    var cbBindings = function( event ) {
-            bindings.apply( this, [event] );
-        };
-
-    if ($.fn.on) {
-        $(this.context).on( events, this.selector, cbBindings );
-    } else {
-        // legacy support
-        $(this).live( events, cbBindings );
-    }
 
     function bindings( event ) {
         var widget = $.inlineEdit.getInstance( this, options ),
@@ -128,7 +122,8 @@ $.inlineEdit.prototype = {
 
     initValue: function() {
 
-        this.value( $.trim( this.element.data('original-content') || this.element.html() ) || this.options.value );
+		var val = this.element.data('original-content') || this.element.html() || this.options.value;
+        this.value( val.trim() );
     
         if ( !this.value() ) {
             this.element.html( $( this.placeholderHtml() ) );
@@ -148,21 +143,21 @@ $.inlineEdit.prototype = {
             .html( self.mutatedHtml( self.value() ) )
             .addClass( self.options.editInProgress )
             .find( '.save' )
-                .bind( 'click', function( event ) {
+                .on( 'click', function( event ) {
                     self.save( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
             .end()
             .find( '.cancel' )
-                .bind( 'click', function( event ) {
+                .on( 'click', function( event ) {
                     self.cancel( self.element, event );
                     self.change( self.element, event );
                     return false;
                 })
             .end()
             .find( self.options.control )
-                .bind( 'blur', function( event ) {
+                .on( 'blur', function( event ) {
                   if (self.options.cancelOnBlur === true) {
                     self.cancel( self.element, event );
                     self.change( self.element, event );
@@ -171,7 +166,7 @@ $.inlineEdit.prototype = {
                     self.change( self.element, event );
                   }
                 })
-                .bind( 'keyup', function( event ) {
+                .on( 'keyup', function( event ) {
                     switch ( event.keyCode ) {
                         case 13: // save on ENTER
                             if (self.options.control !== 'textarea') {
@@ -185,7 +180,7 @@ $.inlineEdit.prototype = {
                             break;
                     }
                 })
-                .focus()
+                .trigger( 'focus')
             .end();
 
         // trigger mutate event on mutation (i.e. edit-in-progress)
@@ -329,7 +324,7 @@ $.inlineEdit.prototype = {
     },
 
     _callback: function( fn, args ) {
-        return ($.isFunction( this.options[fn] ) && this.options[fn].apply( this.element[0], args ) ) !== false || !this.options[fn];
+        return ( typeof this.options[fn] === 'function' && this.options[fn].apply( this.element[0], args ) ) !== false || !this.options[fn];
     },
 
     _decodeHtml: function( encoded ) {
